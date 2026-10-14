@@ -1,7 +1,7 @@
 ---
 name: taste-graph
 description: "Personal taste graph in Obsidian plus recommendations by mood. Use when the user tells you about something they watched, read, listened to, played or ate ('vi o filme X ontem, me prendeu', 'tô lendo Y, aprendi Z'), wants to save something for later, or asks what to watch, read, hear, play or eat now ('tô entediado, quero um filme pra me animar', 'vou pedalar 1h, sugere algo')."
-version: 1.0.0
+version: 1.0.1
 author: Lucas Rotsen
 license: MIT
 platforms: [linux, macos]
@@ -24,8 +24,9 @@ Script (Python 3.10+, stdlib only), called `taste` below:
 python3 ~/.hermes/skills/media/taste-graph/scripts/taste.py <command>
 ```
 
-If that file does not exist, use `${HERMES_SKILL_DIR}/scripts/taste.py`. Settings live in `$TASTE_HOME`
-(default `~/.hermes/taste`).
+Use exactly that path, with `~`: inside a Docker sandbox the skill directory shown when the skill loads is
+not mounted, but `~/.hermes/skills` is. Only if that file does not exist, use `${HERMES_SKILL_DIR}/scripts/taste.py`.
+Settings live in `$TASTE_HOME` (default `~/.hermes/taste`).
 
 | Need | Command |
 |---|---|
@@ -76,19 +77,26 @@ words), then save the favorites with one `taste add` list.
 
 ## When they ask what to watch, read, hear, play or eat
 
-1. Read `taste profile`, `taste index` and `taste recs --days 90`.
+1. Read `taste profile`, the full `taste index` (no filters: favorites matter as much as the `want` list) and
+   `taste recs --days 90`.
 2. Understand the moment: mood, time available, place and device (match a moment in their profile, e.g. the
    bike), alone or with someone. Ask one question only if the type of content is truly unclear.
 3. Pick 2–3 options:
    - **Aposta segura:** close to their favorites (same people, overlapping themes).
    - **Surpresa:** one step away (a neighbouring theme, a creator they would likely like, a classic they have
      not met).
-   - Prefer their `want` list when something there fits. Avoid `done`/`dropped` works and recent `recs`, unless
-     they ask for a rewatch or comfort content (a favorite series, a playlist, a dish).
+   - Prefer their `want` list when something there fits. Skip `dropped` works and picks from recent `recs`.
+   - One-off works they finished (a movie, a book, a game) only come back if they ask for a rewatch. Ongoing
+     things are fair game: a favorite series to rewatch when tired or low, a podcast's or channel's next
+     episodes, a playlist, a favorite dish.
    - Respect the time available, their dislikes and their rules.
-4. Reply in ≤ 8 lines, per option: title (year) · type · duration · where. Then one line on why it fits now,
-   tied to their taste ("o clima de Os Goonies, mas …"). Where to watch comes from your knowledge, limited to the
-   services in their profile; mark it "provável", since catalogues change. No spoilers.
+4. Reply in ≤ 8 lines. Per option, line 1: **title** (year) · type · duration · where. Line 2: why it fits
+   now, tied to their taste and mood ("cansado pede conforto: …", "o clima de Os Goonies, mas …").
+   - Duration always: a movie's runtime, how many episodes fill the time, or "episódios de ~X min".
+   - Name a specific episode or video only when you are sure it exists; otherwise point to the latest episode
+     or a topic to search on the channel. Never invent titles.
+   - Where to watch comes from your knowledge, limited to the services in their profile; mark it "provável",
+     since catalogues change. No spoilers.
 5. Log the picks with `taste rec`. If they choose one, `taste add` it with `status: current` or `want`.
 
 Food: suggest from their `food` works and themes. If a calorie or macro tracker skill is installed and they
